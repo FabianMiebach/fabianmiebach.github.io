@@ -38,6 +38,7 @@ public class AnimeWatchView extends VerticalLayout {
     private final TextField filterText = new TextField();
     private final MultiSelectComboBox<Genre> genreFilter = new MultiSelectComboBox<>();
     private final ComboBox<String> statusFilter = new ComboBox<>();
+    private final Span counter = new Span();
     private final Binder<Anime> binder = new Binder<>(Anime.class);
     private final Binder<News> newsBinder = new Binder<>(News.class);
     private final Dialog editDialog = new Dialog();
@@ -75,7 +76,7 @@ public class AnimeWatchView extends VerticalLayout {
         toolbar.setVerticalComponentAlignment(Alignment.END, addAnimeButton);
         toolbar.setWidthFull();
 
-        add(new H1("AnimeWatch"), toolbar, grid);
+        add(new H1("AnimeWatch"), counter, toolbar, grid);
         updateList();
     }
 
@@ -253,6 +254,8 @@ public class AnimeWatchView extends VerticalLayout {
     }
 
     private void updateList() {
-        grid.setItems(animeService.getFilteredAnime(filterText.getValue(), statusFilter.getValue(), genreFilter.getValue()));
+        List<Anime> list = animeService.getFilteredAnime(filterText.getValue(), statusFilter.getValue(), genreFilter.getValue());
+        grid.setItems(list);
+        counter.setText("Results: " + list.size());
     }
 }
