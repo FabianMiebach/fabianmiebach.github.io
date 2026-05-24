@@ -26,6 +26,7 @@ import com.animewatch.service.AnimeService;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -106,42 +107,66 @@ public class AnimeWatchView extends VerticalLayout {
     private void configureGrid() {
         grid.setSizeFull();
 
-        grid.addColumn(Anime::getTitle).setHeader("Title").setSortable(true).setAutoWidth(true).setFlexGrow(1);
-        grid.addColumn(Anime::getStatus).setHeader("Status").setSortable(true).setWidth("140px").setFlexGrow(0);
-        grid.addColumn(Anime::getRating).setHeader("Rating").setSortable(true).setWidth("160px").setFlexGrow(0);
+        grid.addColumn(Anime::getTitle)
+                .setHeader("Title")
+                .setSortable(true)
+                .setFlexGrow(3)
+                .setResizable(true)
+                .getStyle().set("white-space", "normal").set("word-break", "break-word");
+
+        grid.addColumn(Anime::getStatus)
+                .setHeader("Status")
+                .setSortable(true)
+                .setAutoWidth(true)
+                .setFlexGrow(0)
+                .getStyle().set("white-space", "nowrap");
+
+        grid.addColumn(Anime::getRating)
+                .setHeader("Rating")
+                .setSortable(true)
+                .setAutoWidth(true)
+                .setFlexGrow(0)
+                .getStyle().set("white-space", "nowrap");
 
         grid.addColumn(anime -> {
-            News n = animeService.getNewsForAnime(anime);
-            return (n != null && n.getDate() != null) ? n.getDate().toString() : "";
-        }).setHeader("Date").setSortable(true).setWidth("130px").setFlexGrow(0);
+                    News n = animeService.getNewsForAnime(anime);
+                    return (n != null && n.getDate() != null) ? n.getDate().toString() : "";
+                }).setHeader("Date")
+                .setSortable(true)
+                .setAutoWidth(true)
+                .setFlexGrow(0)
+                .getStyle().set("white-space", "nowrap");
 
         grid.addColumn(anime -> {
-            News n = animeService.getNewsForAnime(anime);
-            return n != null ? n.getContent() : "";
-        }).setHeader("News").setAutoWidth(true).setFlexGrow(2);
+                    News n = animeService.getNewsForAnime(anime);
+                    return n != null ? n.getContent() : "";
+                }).setHeader("News")
+                .setAutoWidth(true)
+                .setFlexGrow(0)
+                .getStyle().set("white-space", "nowrap");
 
         grid.addComponentColumn(anime -> {
             HorizontalLayout badges = new HorizontalLayout();
+            badges.getStyle().set("flex-wrap", "wrap");
             badges.setSpacing(true);
             if (anime.getGenres() != null) {
-                anime.getGenres().forEach(ag -> {
-                    if (ag != null && ag.getGenre() != null) {
-                        Span badge = new Span(ag.getGenre().getIcon());
-                        badge.getElement().setAttribute("title", ag.getGenre().getName());
-                        badges.add(badge);
-                    }
-                });
+                anime.getGenres().stream()
+                        .filter(ag -> ag != null && ag.getGenre() != null)
+                        .sorted(Comparator.comparing(ag -> ag.getGenre().getName()))
+                        .forEach(ag -> {
+                            Span badge = new Span(ag.getGenre().getIcon());
+                            badge.getElement().setAttribute("title", ag.getGenre().getName());
+                            badges.add(badge);
+                        });
             }
             return badges;
-        }).setHeader("Genre").setAutoWidth(true).setFlexGrow(1);
+        }).setHeader("Genre").setFlexGrow(1).setResizable(true);
 
         grid.addComponentColumn(anime -> {
             Button clearDateBtn = new Button(VaadinIcon.CALENDAR_CLOCK.create());
             clearDateBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
-
             News n = animeService.getNewsForAnime(anime);
             clearDateBtn.setEnabled(n != null && n.getDate() != null);
-
             clearDateBtn.addClickListener(e -> {
                 if (n != null) {
                     n.setDate(null);
@@ -165,21 +190,15 @@ public class AnimeWatchView extends VerticalLayout {
         genresBox.setItems(animeService.getAllGenres());
         genresBox.setItemLabelGenerator(g -> g.getIcon() + " " + g.getName());
         newsContentField.setHeight("80px");
-
         formLayout.add(titleField, statusBox, ratingBox, genresBox, newsDatePicker, newsContentField);
-
         binder.bind(titleField, Anime::getTitle, Anime::setTitle);
         binder.bind(statusBox, Anime::getStatus, Anime::setStatus);
         binder.bind(ratingBox, Anime::getRating, Anime::setRating);
-
         newsBinder.bind(newsDatePicker, News::getDate, News::setDate);
         newsBinder.bind(newsContentField, News::getContent, News::setContent);
-
         genresBox.addValueChangeListener(e -> {
             if (currentAnime != null) {
-                if (currentAnime.getGenres() == null) {
-                    currentAnime.setGenres(new ArrayList<>());
-                }
+                if (currentAnime.getGenres() == null) currentAnime.setGenres(new ArrayList<>());
                 List<AnimeGenre> newGenres = e.getValue().stream()
                         .map(genre -> new AnimeGenre(currentAnime, genre))
                         .collect(Collectors.toList());
@@ -187,13 +206,11 @@ public class AnimeWatchView extends VerticalLayout {
                 currentAnime.getGenres().addAll(newGenres);
             }
         });
-
         Button saveBtn = new Button("Save", e -> saveAnime());
         saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         Button cancelBtn = new Button("Discard", e -> editDialog.close());
         Button deleteBtn = new Button("Delete", e -> deleteAnime());
         deleteBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
-
         HorizontalLayout actions = new HorizontalLayout(saveBtn, deleteBtn, cancelBtn);
         editDialog.add(formLayout, actions);
     }
@@ -201,39 +218,27 @@ public class AnimeWatchView extends VerticalLayout {
     private void openAnimeForm(Anime anime) {
         this.currentAnime = anime;
         binder.readBean(anime);
-
         News existing = animeService.getNewsForAnime(anime);
-        if (existing != null) {
-            this.currentNews = existing;
-        } else {
-            this.currentNews = new News();
+        this.currentNews = (existing != null) ? existing : new News();
+        if (existing == null) {
             this.currentNews.setAnime(anime);
-            this.currentNews.setDate(null);
-            this.currentNews.setContent("");
         }
         newsBinder.readBean(currentNews);
-
         if (anime.getGenres() != null) {
-            Set<Genre> currentGenres = anime.getGenres().stream()
-                    .map(AnimeGenre::getGenre)
-                    .collect(Collectors.toSet());
-            genresBox.setValue(currentGenres);
+            genresBox.setValue(anime.getGenres().stream().map(AnimeGenre::getGenre).collect(Collectors.toSet()));
         } else {
             genresBox.setValue(Collections.emptySet());
         }
-
         editDialog.open();
     }
 
     private void saveAnime() {
         if (binder.writeBeanIfValid(currentAnime)) {
             animeService.saveAnime(currentAnime);
-
             if (newsBinder.writeBeanIfValid(currentNews)) {
                 currentNews.setAnime(currentAnime);
                 animeService.saveNews(currentNews);
             }
-
             updateList();
             editDialog.close();
         }
@@ -248,9 +253,6 @@ public class AnimeWatchView extends VerticalLayout {
     }
 
     private void updateList() {
-        String title = filterText.getValue();
-        String status = statusFilter.getValue();
-        Set<Genre> selectedGenres = genreFilter.getValue();
-        grid.setItems(animeService.getFilteredAnime(title, status, selectedGenres));
+        grid.setItems(animeService.getFilteredAnime(filterText.getValue(), statusFilter.getValue(), genreFilter.getValue()));
     }
 }

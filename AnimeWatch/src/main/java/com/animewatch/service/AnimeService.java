@@ -78,6 +78,32 @@ public class AnimeService {
         }
 
         return allAnime.stream()
+                .filter(anime -> {
+                    if (title != null && !title.isEmpty() &&
+                            !anime.getTitle().toLowerCase().contains(title.toLowerCase())) {
+                        return false;
+                    }
+                    if (status != null && !status.isEmpty() && !"All".equalsIgnoreCase(status) &&
+                            !status.equalsIgnoreCase(anime.getStatus())) {
+                        return false;
+                    }
+                    if (genres != null && !genres.isEmpty()) {
+                        if (anime.getGenres() == null) {
+                            return false;
+                        }
+                        Set<Long> animeGenreIds = anime.getGenres().stream()
+                                .map(ag -> ag != null && ag.getGenre() != null ? ag.getGenre().getId() : null)
+                                .filter(id -> id != null)
+                                .collect(Collectors.toSet());
+
+                        for (Genre g : genres) {
+                            if (!animeGenreIds.contains(g.getId())) {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                })
                 .sorted((a1, a2) -> {
                     News n1 = getNewsForAnime(a1);
                     News n2 = getNewsForAnime(a2);
