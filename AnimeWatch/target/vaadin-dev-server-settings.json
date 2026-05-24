@@ -1,0 +1,17 @@
+{
+  "frontendFolder": "/home/fabian/IdeaProjects/fabianmiebach.github.io/AnimeWatch/./frontend",
+  "themeFolder": "themes",
+  "themeResourceFolder": "/home/fabian/IdeaProjects/fabianmiebach.github.io/AnimeWatch/./frontend/generated/jar-resources",
+  "staticOutput": "/home/fabian/IdeaProjects/fabianmiebach.github.io/AnimeWatch/target/classes/META-INF/VAADIN/webapp/VAADIN/static",
+  "generatedFolder": "generated",
+  "statsOutput": "/home/fabian/IdeaProjects/fabianmiebach.github.io/AnimeWatch/target/classes/META-INF/VAADIN/config",
+  "frontendBundleOutput": "/home/fabian/IdeaProjects/fabianmiebach.github.io/AnimeWatch/target/classes/META-INF/VAADIN/webapp",
+  "devBundleOutput": "/home/fabian/IdeaProjects/fabianmiebach.github.io/AnimeWatch/src/main/dev-bundle/webapp",
+  "devBundleStatsOutput": "/home/fabian/IdeaProjects/fabianmiebach.github.io/AnimeWatch/src/main/dev-bundle/config",
+  "jarResourcesFolder": "/home/fabian/IdeaProjects/fabianmiebach.github.io/AnimeWatch/./frontend/generated/jar-resources",
+  "themeName": "",
+  "clientServiceWorkerSource": "/home/fabian/IdeaProjects/fabianmiebach.github.io/AnimeWatch/target/sw.ts",
+  "pwaEnabled": false,
+  "offlineEnabled": false,
+  "offlinePath": "'offline.html'"
+}
