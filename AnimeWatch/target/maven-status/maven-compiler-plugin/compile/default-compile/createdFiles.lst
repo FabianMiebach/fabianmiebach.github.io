@@ -1,0 +1,11 @@
+com\fabowatch\repository\NewsRepository.class
+com\fabowatch\ui\GenreLoader.class
+DB_Tables\AnimeGenre.class
+com\fabowatch\repository\GenreRepository.class
+DB_Tables\Genre.class
+DB_Tables\UserSettings.class
+com\fabowatch\jobs\NewsStatusScheduler.class
+com\fabowatch\controller\AnimeController.class
+DB_Tables\News.class
+com\fabowatch\repository\AnimeRepository.class
+DB_Tables\Anime.class
