@@ -1,7 +1,7 @@
-package com.animewatch.ui;
+package com.animewatch.jobs;
 
-import DB_Tables.Genre;
-import com.animewatch.repository.GenreRepository;
+import com.animewatch.db.Genre;
+import com.animewatch.dao.GenreDao;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class GenreLoader {
 
-    private final GenreRepository genreRepo;
+    private final GenreDao genreRepo;
 
-    public GenreLoader(GenreRepository genreRepo) {
+    public GenreLoader(GenreDao genreRepo) {
         this.genreRepo = genreRepo;
     }
 

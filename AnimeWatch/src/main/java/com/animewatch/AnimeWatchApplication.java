@@ -5,9 +5,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.event.EventListener;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@EntityScan("DB_Tables")
+@EntityScan(basePackages = "com.animewatch.db")
+@EnableJpaRepositories(basePackages = "com.animewatch.dao")
 public class AnimeWatchApplication {
 
 	public static void main(String[] args) {

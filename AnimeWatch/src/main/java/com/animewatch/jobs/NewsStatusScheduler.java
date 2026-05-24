@@ -1,8 +1,8 @@
 package com.animewatch.jobs;
 
-import DB_Tables.Anime;
-import com.animewatch.repository.AnimeRepository;
-import com.animewatch.repository.NewsRepository;
+import com.animewatch.db.Anime;
+import com.animewatch.dao.AnimeDao;
+import com.animewatch.dao.NewsDao;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -14,10 +14,10 @@ import java.util.List;
 @EnableScheduling
 public class NewsStatusScheduler {
 
-    private final AnimeRepository animeRepo;
-    private final NewsRepository newsRepo;
+    private final AnimeDao animeRepo;
+    private final NewsDao newsRepo;
 
-    public NewsStatusScheduler(AnimeRepository animeRepo, NewsRepository newsRepo) {
+    public NewsStatusScheduler(AnimeDao animeRepo, NewsDao newsRepo) {
         this.animeRepo = animeRepo;
         this.newsRepo = newsRepo;
     }

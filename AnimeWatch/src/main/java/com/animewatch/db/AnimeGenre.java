@@ -1,4 +1,4 @@
-package DB_Tables;
+package com.animewatch.db;
 
 
 import jakarta.persistence.*;
