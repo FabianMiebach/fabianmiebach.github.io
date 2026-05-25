@@ -43,7 +43,7 @@ public class AnimeWatchlistView extends VerticalLayout {
     private final Dialog editDialog = new Dialog();
 
     private final TextField titleField = new TextField("Title");
-    private final ComboBox<String> statusBox = new ComboBox<>("Status", "Unwatched", "Watching", "Finished", "Dropped", "Watchlist");
+    private final ComboBox<String> statusBox = new ComboBox<>("Status", "Unwatched", "Watching", "Finished", "Dropped");
     private final ComboBox<String> ratingBox = new ComboBox<>("Rating", "Recommended", "Meh", "Not Recommended");
     private final MultiSelectComboBox<Genre> genresBox = new MultiSelectComboBox<>("Genres");
     private final DatePicker newsDatePicker = new DatePicker("Date");
@@ -106,49 +106,20 @@ public class AnimeWatchlistView extends VerticalLayout {
 
     private void configureGrid() {
         grid.setSizeFull();
-
-        grid.addColumn(Anime::getTitle)
-                .setHeader("Title")
-                .setSortable(true)
-                .setFlexGrow(3)
-                .setResizable(true)
-                .getStyle().set("white-space", "normal").set("word-break", "break-word");
-
-        grid.addColumn(Anime::getStatus)
-                .setHeader("Status")
-                .setSortable(true)
-                .setAutoWidth(true)
-                .setFlexGrow(0)
-                .getStyle().set("white-space", "nowrap");
-
-        grid.addColumn(Anime::getRating)
-                .setHeader("Rating")
-                .setSortable(true)
-                .setAutoWidth(true)
-                .setFlexGrow(0)
-                .getStyle().set("white-space", "nowrap");
-
+        grid.addColumn(Anime::getTitle).setHeader("Title").setSortable(true).setFlexGrow(3).setResizable(true);
+        grid.addColumn(Anime::getStatus).setHeader("Status").setSortable(true).setAutoWidth(true);
+        grid.addColumn(Anime::getRating).setHeader("Rating").setSortable(true).setAutoWidth(true);
         grid.addColumn(anime -> {
-                    News n = animeService.getNewsForAnime(anime);
-                    return (n != null && n.getDate() != null) ? n.getDate().toString() : "";
-                }).setHeader("Date")
-                .setSortable(true)
-                .setAutoWidth(true)
-                .setFlexGrow(0)
-                .getStyle().set("white-space", "nowrap");
-
+            News n = animeService.getNewsForAnime(anime);
+            return (n != null && n.getDate() != null) ? n.getDate().toString() : "";
+        }).setHeader("Date").setSortable(true).setAutoWidth(true);
         grid.addColumn(anime -> {
-                    News n = animeService.getNewsForAnime(anime);
-                    return n != null ? n.getContent() : "";
-                }).setHeader("News")
-                .setAutoWidth(true)
-                .setFlexGrow(0)
-                .getStyle().set("white-space", "nowrap");
+            News n = animeService.getNewsForAnime(anime);
+            return n != null ? n.getContent() : "";
+        }).setHeader("News").setAutoWidth(true);
 
         grid.addComponentColumn(anime -> {
             HorizontalLayout badges = new HorizontalLayout();
-            badges.getStyle().set("flex-wrap", "wrap");
-            badges.setSpacing(true);
             if (anime.getGenres() != null) {
                 anime.getGenres().stream()
                         .filter(ag -> ag != null && ag.getGenre() != null)
@@ -160,7 +131,7 @@ public class AnimeWatchlistView extends VerticalLayout {
                         });
             }
             return badges;
-        }).setHeader("Genre").setFlexGrow(1).setResizable(true);
+        }).setHeader("Genre").setFlexGrow(1);
 
         grid.addComponentColumn(anime -> {
             Button clearDateBtn = new Button(VaadinIcon.CALENDAR_CLOCK.create());
@@ -175,14 +146,14 @@ public class AnimeWatchlistView extends VerticalLayout {
                 }
             });
             return clearDateBtn;
-        }).setWidth("60px").setFlexGrow(0);
+        }).setWidth("60px");
 
         grid.addComponentColumn(anime -> {
             Button editBtn = new Button(VaadinIcon.EDIT.create());
             editBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
             editBtn.addClickListener(e -> openAnimeForm(anime));
             return editBtn;
-        }).setWidth("60px").setFlexGrow(0);
+        }).setWidth("60px");
     }
 
     private void configureFormDialog() {
@@ -220,9 +191,7 @@ public class AnimeWatchlistView extends VerticalLayout {
         binder.readBean(anime);
         News existing = animeService.getNewsForAnime(anime);
         this.currentNews = (existing != null) ? existing : new News();
-        if (existing == null) {
-            this.currentNews.setAnime(anime);
-        }
+        if (existing == null) this.currentNews.setAnime(anime);
         newsBinder.readBean(currentNews);
         if (anime.getGenres() != null) {
             genresBox.setValue(anime.getGenres().stream().map(AnimeGenre::getGenre).collect(Collectors.toSet()));
@@ -253,7 +222,15 @@ public class AnimeWatchlistView extends VerticalLayout {
     }
 
     private void updateList() {
-        List<Anime> list = animeService.getFilteredAnime(filterText.getValue(), statusFilter.getValue(), genreFilter.getValue());
+        String status = statusFilter.getValue();
+        List<Anime> list;
+        if ("Watchlist".equals(status)) {
+            list = animeService.getFilteredAnime(filterText.getValue(), "All", genreFilter.getValue()).stream()
+                    .filter(a -> "Unwatched".equals(a.getStatus()) || "Watching".equals(a.getStatus()))
+                    .collect(Collectors.toList());
+        } else {
+            list = animeService.getFilteredAnime(filterText.getValue(), status, genreFilter.getValue());
+        }
         grid.setItems(list);
         counter.setText("Results: " + list.size());
     }
