@@ -1,4 +1,7 @@
 The AnimeWatchlist web-application can be used to store Anime titles in a local DB.
+It lists the entries with alphabetical order. If an entry was given a date (intended to rewatch or check out if there
+is a new Movie/Season for the entry), it will switch to the status "Watching" and be listed at the top, OVER the rest
+of the list.
 
 Setup:
 -Checkout the code into your lokal IDE (I used IntelliJ)

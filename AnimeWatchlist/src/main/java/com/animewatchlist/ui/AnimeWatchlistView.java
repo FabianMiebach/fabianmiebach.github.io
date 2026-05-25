@@ -4,6 +4,7 @@ import com.animewatchlist.db.Anime;
 import com.animewatchlist.db.AnimeGenre;
 import com.animewatchlist.db.Genre;
 import com.animewatchlist.db.News;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -12,6 +13,7 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -54,11 +56,17 @@ public class AnimeWatchlistView extends VerticalLayout {
 
     public AnimeWatchlistView(AnimeService animeService) {
         this.animeService = animeService;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style');" +
+                        "style.innerHTML = '.wrap-text { white-space: normal !important; word-break: break-word !important; display: block !important; }';" +
+                        "document.head.appendChild(style);"
+        );
         initUI();
     }
 
     public void initUI() {
         setSizeFull();
+        grid.getStyle().set("--_lumo-grid-cell-height", "auto");
         configureGrid();
         configureFormDialog();
 
@@ -106,54 +114,55 @@ public class AnimeWatchlistView extends VerticalLayout {
 
     private void configureGrid() {
         grid.setSizeFull();
-        grid.addColumn(Anime::getTitle).setHeader("Title").setSortable(true).setFlexGrow(3).setResizable(true);
-        grid.addColumn(Anime::getStatus).setHeader("Status").setSortable(true).setAutoWidth(true);
-        grid.addColumn(Anime::getRating).setHeader("Rating").setSortable(true).setAutoWidth(true);
+        grid.setColumnReorderingAllowed(false);
+
+        grid.addComponentColumn(anime -> {
+            Div div = new Div();
+            div.setText(anime.getTitle());
+            div.addClassName("wrap-text");
+            return div;
+        }).setHeader("Title").setSortable(true).setComparator(Anime::getTitle).setFlexGrow(3);
+
+        grid.addColumn(Anime::getStatus).setHeader("Status").setSortable(true).setFlexGrow(1);
+        grid.addColumn(Anime::getRating).setHeader("Rating").setSortable(true).setFlexGrow(1);
         grid.addColumn(anime -> {
             News n = animeService.getNewsForAnime(anime);
             return (n != null && n.getDate() != null) ? n.getDate().toString() : "";
-        }).setHeader("Date").setSortable(true).setAutoWidth(true);
+        }).setHeader("Date").setSortable(true).setFlexGrow(1);
         grid.addColumn(anime -> {
             News n = animeService.getNewsForAnime(anime);
             return n != null ? n.getContent() : "";
-        }).setHeader("News").setAutoWidth(true);
+        }).setHeader("News").setSortable(true).setFlexGrow(2);
 
         grid.addComponentColumn(anime -> {
-            HorizontalLayout badges = new HorizontalLayout();
+            Div container = new Div();
+            container.addClassName("wrap-text");
             if (anime.getGenres() != null) {
-                anime.getGenres().stream()
+                String icons = anime.getGenres().stream()
                         .filter(ag -> ag != null && ag.getGenre() != null)
                         .sorted(Comparator.comparing(ag -> ag.getGenre().getName()))
-                        .forEach(ag -> {
-                            Span badge = new Span(ag.getGenre().getIcon());
-                            badge.getElement().setAttribute("title", ag.getGenre().getName());
-                            badges.add(badge);
-                        });
+                        .map(ag -> ag.getGenre().getIcon())
+                        .collect(Collectors.joining(" "));
+                container.setText(icons);
             }
-            return badges;
-        }).setHeader("Genre").setFlexGrow(1);
+            return container;
+        }).setHeader("Genre").setFlexGrow(2);
 
         grid.addComponentColumn(anime -> {
             Button clearDateBtn = new Button(VaadinIcon.CALENDAR_CLOCK.create());
             clearDateBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
             News n = animeService.getNewsForAnime(anime);
             clearDateBtn.setEnabled(n != null && n.getDate() != null);
-            clearDateBtn.addClickListener(e -> {
-                if (n != null) {
-                    n.setDate(null);
-                    animeService.saveNews(n);
-                    updateList();
-                }
-            });
+            clearDateBtn.addClickListener(e -> { if (n != null) { n.setDate(null); animeService.saveNews(n); updateList(); } });
             return clearDateBtn;
-        }).setWidth("60px");
+        }).setWidth("60px").setFlexGrow(0);
 
         grid.addComponentColumn(anime -> {
             Button editBtn = new Button(VaadinIcon.EDIT.create());
             editBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
             editBtn.addClickListener(e -> openAnimeForm(anime));
             return editBtn;
-        }).setWidth("60px");
+        }).setWidth("60px").setFlexGrow(0);
     }
 
     private void configureFormDialog() {
