@@ -25,3 +25,4 @@ docker start animewatch-db
 Load DB state into your docker container (Arch-Linux):
 docker exec -i animewatch-db mysql -uroot -ppw animewatch < /home/user/YOUR_BACKUP_DIRECTORY/anime_watchlist_backup.sql
 
+For a default DB state, use the Entity-Classes for reference to create a MySQL template (too lazy to upload one rn).
