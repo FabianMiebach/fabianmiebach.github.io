@@ -26,10 +26,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.animewatchlist.service.AnimeService;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Route("/AnimeWatchlist")
@@ -170,6 +167,7 @@ public class AnimeWatchlistView extends VerticalLayout {
         genresBox.setItems(animeService.getAllGenres());
         genresBox.setItemLabelGenerator(g -> g.getIcon() + " " + g.getName());
         newsContentField.setHeight("80px");
+        newsDatePicker.setLocale(Locale.GERMANY);
         formLayout.add(titleField, statusBox, ratingBox, genresBox, newsDatePicker, newsContentField);
         binder.bind(titleField, Anime::getTitle, Anime::setTitle);
         binder.bind(statusBox, Anime::getStatus, Anime::setStatus);
